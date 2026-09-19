@@ -42,24 +42,24 @@ public class CustomEmojiKeyboardService extends InputMethodService {
 
     private static final String[] SPECIAL_NAMES = {
         "alien","apple","avocado","balloon","banana","basketball","beach","bee","bell","bike","bird","birthday",
-        "book","bow","bread","burger","cake","camera","candy","car","cat","cherry","chess","chicken","cloud",
-        "coffee","comet","cookie","crown","crystal","diamond","dog","donut","dragon","earth","egg","firework",
-        "flower","football","gamepad","ghost","gift","guitar","hamburger","headphones","icecream","island","key",
+        "book","bow","bread","burger","cake","camera","candy","car","cat","cherry","chicken","cloud",
+        "coffee","comet","cookie","crown","diamond","dog","donut","dragon","earth","egg","firework",
+        "flower","football","gamepad","ghost","gift","guitar","headphones","icecream","island","key",
         "kiwi","lemon","lightning","lock","magic","melon","microphone","moon","mushroom","music","octopus","orange",
         "panda","party","peach","pear","penguin","pizza","planet","popcorn","rainbow","rocket","rose","sandwich",
         "satellite","shark","shield","soccer","sparkle","sun","sunglasses","sword","taco","teddy","thunder","ticket",
-        "trophy","tulip","unicorn","watermelon","whale","wizard","wolf","yo-yo"
+        "trophy","tulip","unicorn","watermelon","whale","wizard","wolf"
     };
 
     private static final String[] SPECIAL_UNICODE = {
         "👽","🍎","🥑","🎈","🍌","🏀","🏖️","🐝","🔔","🚲","🐦","🎂",
-        "📖","🏹","🍞","🍔","🍰","📷","🍬","🚗","🐱","🍒","♟️","🐔","☁️",
-        "☕","☄️","🍪","👑","💎","💠","🐶","🍩","🐉","🌍","🥚","🎆",
-        "🌸","🏈","🎮","👻","🎁","🎸","🍔","🎧","🍦","🏝️","🔑",
+        "📖","🏹","🍞","🍔","🍰","📷","🍬","🚗","🐱","🍒","🐔","☁️",
+        "☕","☄️","🍪","👑","💎","🐶","🍩","🐉","🌍","🥚","🎆",
+        "🌸","🏈","🎮","👻","🎁","🎸","🎧","🍦","🏝️","🔑",
         "🥝","🍋","⚡","🔒","✨","🍈","🎤","🌙","🍄","🎵","🐙","🍊",
         "🐼","🎉","🍑","🍐","🐧","🍕","🪐","🍿","🌈","🚀","🌹","🥪",
         "🛰️","🦈","🛡️","⚽","✨","☀️","😎","⚔️","🌮","🧸","🌩️","🎟️",
-        "🏆","🌷","🦄","🍉","🐋","🧙","🐺","🪀"
+        "🏆","🌷","🦄","🍉","🐋","🧙","🐺"
     };
 
     private Bitmap skinSheet;
