@@ -1,1 +1,4 @@
-<resources><string name="app_name">Custom Emojis</string><string name="ime_name">Custom Emojis</string><string name="subtype_tr">Türkçe</string></resources>
+<resources>
+    <string name="app_name">Custom Emojis</string>
+    <string name="ime_name">Custom Emojis Klavyesi</string>
+</resources>
