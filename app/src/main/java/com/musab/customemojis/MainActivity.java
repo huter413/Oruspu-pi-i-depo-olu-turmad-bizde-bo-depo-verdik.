@@ -118,6 +118,7 @@ public class MainActivity extends Activity {
         Set<String> copy = new HashSet<>(old);
         copy.add(uri.toString());
         getSharedPreferences(PREFS, MODE_PRIVATE).edit().putStringSet(KEY_URIS, copy).apply();
+        sendBroadcast(new Intent("com.musab.customemojis.EMOJI_CHANGED").setPackage(getPackageName()));
         recreate();
     }
 }
