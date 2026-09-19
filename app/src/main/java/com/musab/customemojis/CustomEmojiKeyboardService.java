@@ -1,3 +1,31 @@
 package com.musab.customemojis;
-import android.inputmethodservice.InputMethodService;import android.view.*;import android.widget.*;import android.graphics.Color;import android.content.*;import android.graphics.drawable.*;import java.util.*;
-public class CustomEmojiKeyboardService extends InputMethodService { private final String[] emojis={"😀","😂","😍","😎","🤖","👻","🔥","❤️","✨","😮","😉","🎉","😢","😄","🍊","⭐"}; public View onCreateInputView(){ LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(8,8,8,8); TextView title=new TextView(this);title.setText("Custom Emojis");title.setTextSize(18);title.setTextColor(Color.BLACK);root.addView(title,new LinearLayout.LayoutParams(-1,48)); GridLayout grid=new GridLayout(this);grid.setColumnCount(4); for(String e:emojis){Button b=new Button(this);b.setText(e);b.setTextSize(28);b.setOnClickListener(v->{InputConnection ic=getCurrentInputConnection();if(ic!=null)ic.commitText(e,1);});grid.addView(b,new ViewGroup.LayoutParams(0,70));} root.addView(grid,new LinearLayout.LayoutParams(-1,-1));return root;}}
+
+import android.inputmethodservice.InputMethodService;
+import android.view.View;
+import android.view.inputmethod.InputConnection;
+import android.widget.Button;
+import android.widget.GridLayout;
+import android.graphics.Color;
+import android.view.Gravity;
+
+public class CustomEmojiKeyboardService extends InputMethodService {
+    @Override public View onCreateInputView() {
+        GridLayout grid = new GridLayout(this);
+        grid.setColumnCount(4);
+        grid.setPadding(12, 12, 12, 12);
+        String[] emojis = {"😀","😂","😎","❤️","🔥","⭐","🍊","🤖","👻","🎮","✨","😈"};
+        for (String emoji : emojis) {
+            Button b = new Button(this);
+            b.setText(emoji);
+            b.setTextSize(26);
+            b.setGravity(Gravity.CENTER);
+            b.setBackgroundColor(Color.TRANSPARENT);
+            b.setOnClickListener(v -> {
+                InputConnection ic = getCurrentInputConnection();
+                if (ic != null) ic.commitText(((Button)v).getText(), 1);
+            });
+            grid.addView(b, new GridLayout.LayoutParams());
+        }
+        return grid;
+    }
+}
