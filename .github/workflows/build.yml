@@ -1,4 +1,5 @@
 name: Build APK
+# APK verification accepts resource paths produced by aapt.
 
 on:
   push:
@@ -17,29 +18,24 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
           cache: gradle
-
       - name: Install emoji renderer
         run: |
           sudo apt-get update
           sudo apt-get install -y fonts-noto-color-emoji
           python3 -m pip install --upgrade pillow
-
       - name: Generate real PNG emoji sheets
         run: python3 tools/generate_emoji_sheets.py
-
       - name: Set up Gradle 8.9
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.9"
           cache-read-only: false
-
       - name: Verify project
         run: |
           test -f settings.gradle
@@ -55,10 +51,8 @@ jobs:
           test -s app/src/main/res/drawable-nodpi/skin_095.png
           test -s app/src/main/res/drawable-nodpi/special_000.png
           test -s app/src/main/res/drawable-nodpi/special_087.png
-
       - name: Build debug APK
         run: gradle --no-daemon --stacktrace --warning-mode all :app:assembleDebug
-
       - name: Verify APK
         run: |
           set -e
@@ -71,7 +65,6 @@ jobs:
           unzip -l "$APK" | grep -E 'special_(000|087)\.png$'
           echo "APK verification passed."
           ls -lh "$APK"
-
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
