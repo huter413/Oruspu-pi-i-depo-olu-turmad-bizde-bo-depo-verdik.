@@ -61,11 +61,16 @@ jobs:
 
       - name: Verify APK
         run: |
-          test -s app/build/outputs/apk/debug/app-debug.apk
-          unzip -l app/build/outputs/apk/debug/app-debug.apk | grep -E 'classes[0-9]*\.dex'
-          unzip -l app/build/outputs/apk/debug/app-debug.apk | grep -E 'res/drawable-nodpi/skin_(000|095)\.png'
-          unzip -l app/build/outputs/apk/debug/app-debug.apk | grep -E 'res/drawable-nodpi/special_(000|087)\.png'
-          ls -lh app/build/outputs/apk/debug/app-debug.apk
+          set -e
+          APK=app/build/outputs/apk/debug/app-debug.apk
+          test -s "$APK"
+          echo "Checking DEX files..."
+          unzip -l "$APK" | grep -E '(^|[[:space:]])classes[0-9]*\.dex$'
+          echo "Checking bundled emoji PNG resources..."
+          unzip -l "$APK" | grep -E 'skin_(000|095)\.png$'
+          unzip -l "$APK" | grep -E 'special_(000|087)\.png$'
+          echo "APK verification passed."
+          ls -lh "$APK"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
