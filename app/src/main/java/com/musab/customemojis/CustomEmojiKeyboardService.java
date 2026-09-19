@@ -2,6 +2,8 @@ package com.musab.customemojis;
 
 import android.content.ClipDescription;
 import android.content.Intent;
+import android.content.BroadcastReceiver;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -30,6 +32,7 @@ public class CustomEmojiKeyboardService extends InputMethodService {
     private static final String PREFS="custom_emojis", KEY_URIS="image_uris";
     private boolean emojiMode=false;
     private boolean numberMode=false;
+    private BroadcastReceiver emojiChangedReceiver;
 
     private static final String[] EMOJIS={
         "😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","🙂","🙃","😉","😌","😍","🥰",
@@ -49,6 +52,30 @@ public class CustomEmojiKeyboardService extends InputMethodService {
         "🎟️","🏆","🌷","🦄","🍉","🐋","🧙","🐺"
     };
 
+    @Override public void onCreate() {
+        super.onCreate();
+        emojiChangedReceiver=new BroadcastReceiver(){
+            @Override public void onReceive(android.content.Context context,Intent intent){
+                if("com.musab.customemojis.EMOJI_CHANGED".equals(intent.getAction())){
+                    setInputView(buildKeyboard());
+                }
+            }
+        };
+        if(Build.VERSION.SDK_INT>=33){
+            registerReceiver(emojiChangedReceiver,new IntentFilter("com.musab.customemojis.EMOJI_CHANGED"),Context.RECEIVER_NOT_EXPORTED);
+        }else{
+            registerReceiver(emojiChangedReceiver,new IntentFilter("com.musab.customemojis.EMOJI_CHANGED"));
+        }
+    }
+
+    @Override public void onDestroy(){
+        if(emojiChangedReceiver!=null){
+            try{ unregisterReceiver(emojiChangedReceiver); }catch(Exception ignored){}
+            emojiChangedReceiver=null;
+        }
+        super.onDestroy();
+    }
+
     @Override public View onCreateInputView(){
         return buildKeyboard();
     }
@@ -56,10 +83,11 @@ public class CustomEmojiKeyboardService extends InputMethodService {
     private View buildKeyboard(){
         LinearLayout root=new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(Color.rgb(24,24,28));
+        root.setBackgroundResource(R.drawable.keyboard_background);
 
         LinearLayout bar=new LinearLayout(this);
         bar.setGravity(Gravity.CENTER_VERTICAL);
+        bar.setPadding(dp(4),dp(3),dp(4),dp(3));
         TextView title=new TextView(this);
         title.setText(emojiMode?"EMOJİLER":(numberMode?"SAYILAR":"ABC"));
         title.setTextColor(Color.WHITE); title.setTextSize(13);
@@ -145,7 +173,8 @@ public class CustomEmojiKeyboardService extends InputMethodService {
         inside.setOrientation(LinearLayout.VERTICAL);
         inside.setPadding(dp(2),dp(1),dp(2),dp(2));
 
-        TextView header=label("EMOJİLER • KAYDIR");
+        TextView header=label("✨  EMOJİ GALERİSİ  •  KAYDIR");
+        header.setBackgroundResource(R.drawable.emoji_header_background);
         inside.addView(header,new LinearLayout.LayoutParams(-1,dp(20)));
 
         GridLayout skinGrid=new GridLayout(this);
@@ -218,7 +247,7 @@ public class CustomEmojiKeyboardService extends InputMethodService {
 
     private void addBitmapButton(GridLayout grid,Bitmap bitmap,String description,Runnable action){
         ImageButton b=new ImageButton(this);
-        b.setBackgroundColor(Color.rgb(42,42,50)); b.setPadding(0,0,0,0);
+        b.setBackgroundResource(R.drawable.emoji_button_background); b.setPadding(0,0,0,0);
         b.setScaleType(ImageButton.ScaleType.CENTER_INSIDE); b.setImageBitmap(bitmap);
         b.setContentDescription(description); b.setOnClickListener(v->{animateKeyPress(b); action.run();});
         GridLayout.LayoutParams lp=new GridLayout.LayoutParams();
