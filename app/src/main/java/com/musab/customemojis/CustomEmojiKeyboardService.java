@@ -49,11 +49,7 @@ public class CustomEmojiKeyboardService extends InputMethodService {
         "🎟️","🏆","🌷","🦄","🍉","🐋","🧙","🐺"
     };
 
-    private Bitmap skinSheet,specialSheet;
-
     @Override public View onCreateInputView(){
-        skinSheet=loadBitmap(R.drawable.emoji_skins);
-        specialSheet=loadBitmap(R.drawable.special_emojis);
         return buildKeyboard();
     }
 
@@ -127,7 +123,7 @@ public class CustomEmojiKeyboardService extends InputMethodService {
         skinGrid.setColumnCount(8);
         for(int i=0;i<EMOJIS.length;i++){
             final int index=i;
-            Bitmap b=crop(skinSheet,index,12,96);
+            Bitmap b=loadNamedPng("skin_",index);
             if(b!=null) addBitmapButton(skinGrid,b,EMOJIS[i],()->commitUnicode(EMOJIS[index]));
         }
         inside.addView(skinGrid,new LinearLayout.LayoutParams(-1,-2));
@@ -140,7 +136,7 @@ public class CustomEmojiKeyboardService extends InputMethodService {
         specialGrid.setColumnCount(8);
         for(int i=0;i<SPECIAL_UNICODE.length;i++){
             final int index=i;
-            Bitmap b=crop(specialSheet,index,11,88);
+            Bitmap b=loadNamedPng("special_",index);
             if(b!=null) addBitmapButton(specialGrid,b,SPECIAL_UNICODE[i],()->commitUnicode(SPECIAL_UNICODE[index]));
         }
         for(String raw:readUris()) addCustomImage(specialGrid,Uri.parse(raw));
@@ -193,17 +189,12 @@ public class CustomEmojiKeyboardService extends InputMethodService {
         grid.addView(b,lp);
     }
 
-    private Bitmap crop(Bitmap sheet,int index,int columns,int count){
-        if(sheet==null) return null;
-        int rows=(count+columns-1)/columns;
-        if(sheet.getWidth()<columns || sheet.getHeight()<rows) return null;
-        int cellW=sheet.getWidth()/columns, cellH=sheet.getHeight()/rows;
-        int x=(index%columns)*cellW, y=(index/columns)*cellH;
-        try{return Bitmap.createBitmap(sheet,x,y,cellW,cellH);}catch(Throwable e){return null;}
-    }
-
-    private Bitmap loadBitmap(int id){
-        try{return BitmapFactory.decodeResource(getResources(),id);}catch(Throwable e){return null;}
+    private Bitmap loadNamedPng(String prefix,int index){
+        try{
+            String name=prefix+String.format(java.util.Locale.US,"%03d",index);
+            int id=getResources().getIdentifier(name,"drawable",getPackageName());
+            return id==0?null:BitmapFactory.decodeResource(getResources(),id);
+        }catch(Throwable e){return null;}
     }
 
     private void addCustomImage(GridLayout grid,Uri uri){
