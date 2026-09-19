@@ -58,7 +58,7 @@ public class CustomEmojiKeyboardService extends InputMethodService {
         emojiChangedReceiver=new BroadcastReceiver(){
             @Override public void onReceive(android.content.Context context,Intent intent){
                 if("com.musab.customemojis.EMOJI_CHANGED".equals(intent.getAction())){
-                    setInputView(buildKeyboard());
+                    postRefreshKeyboard();
                 }
             }
         };
@@ -67,6 +67,10 @@ public class CustomEmojiKeyboardService extends InputMethodService {
         }else{
             registerReceiver(emojiChangedReceiver,new IntentFilter("com.musab.customemojis.EMOJI_CHANGED"));
         }
+    }
+
+    private void postRefreshKeyboard(){
+        new android.os.Handler(getMainLooper()).post(() -> setInputView(buildKeyboard()));
     }
 
     @Override public void onDestroy(){
@@ -79,6 +83,12 @@ public class CustomEmojiKeyboardService extends InputMethodService {
 
     @Override public View onCreateInputView(){
         return buildKeyboard();
+    }
+
+    @Override public void onStartInput(android.view.inputmethod.EditorInfo attribute, boolean restarting){
+        super.onStartInput(attribute, restarting);
+        // Always reload saved custom PNGs when an input connection starts.
+        postRefreshKeyboard();
     }
 
     private View buildKeyboard(){
