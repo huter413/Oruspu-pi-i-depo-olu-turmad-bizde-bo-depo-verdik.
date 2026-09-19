@@ -145,11 +145,11 @@ public class CustomEmojiKeyboardService extends InputMethodService {
         inside.setOrientation(LinearLayout.VERTICAL);
         inside.setPadding(dp(2),dp(1),dp(2),dp(2));
 
-        TextView header=label("96 SKIN + 88 ÖZEL • KAYDIR");
-        inside.addView(header,new LinearLayout.LayoutParams(-1,dp(24)));
+        TextView header=label("EMOJİLER • KAYDIR");
+        inside.addView(header,new LinearLayout.LayoutParams(-1,dp(20)));
 
         GridLayout skinGrid=new GridLayout(this);
-        skinGrid.setColumnCount(8);
+        skinGrid.setColumnCount(10);
         for(String raw:readUris()) addCustomImage(skinGrid,Uri.parse(raw));
         for(int i=0;i<EMOJIS.length;i++){
             final int index=i;
@@ -158,12 +158,12 @@ public class CustomEmojiKeyboardService extends InputMethodService {
         }
         inside.addView(skinGrid,new LinearLayout.LayoutParams(-1,-2));
 
-        TextView sh=label("88 ÖZEL");
+        TextView sh=label("DAHA FAZLA EMOJİ");
         sh.setPadding(0,dp(4),0,0);
-        inside.addView(sh,new LinearLayout.LayoutParams(-1,dp(26)));
+        inside.addView(sh,new LinearLayout.LayoutParams(-1,dp(20)));
 
         GridLayout specialGrid=new GridLayout(this);
-        specialGrid.setColumnCount(8);
+        specialGrid.setColumnCount(10);
         for(int i=0;i<SPECIAL_UNICODE.length;i++){
             final int index=i;
             Bitmap b=loadNamedPng("special_",index);
@@ -194,14 +194,14 @@ public class CustomEmojiKeyboardService extends InputMethodService {
         b.setTextSize(text.length()>1?10:14);
         b.setOnClickListener(v->{animateKeyPress(b); action.run();});
         GridLayout.LayoutParams lp=new GridLayout.LayoutParams();
-        lp.width=0; lp.height=dp(36);
+        lp.width=0; lp.height=dp(30);
         lp.columnSpec=GridLayout.spec(GridLayout.UNDEFINED,1f);
         grid.addView(b,lp);
     }
 
     private void animateKeyPress(View v){
         v.setBackgroundColor(Color.rgb(20,78,145));
-        v.animate().translationY(-dp(8)).alpha(0.88f).setDuration(90).withEndAction(() ->
+        v.animate().translationY(-dp(6)).alpha(0.88f).setDuration(90).withEndAction(() ->
             v.animate().translationY(0).alpha(1f).setDuration(140).withEndAction(() ->
                 v.setBackgroundColor(Color.rgb(52,52,62))
             ).start()
@@ -218,11 +218,11 @@ public class CustomEmojiKeyboardService extends InputMethodService {
 
     private void addBitmapButton(GridLayout grid,Bitmap bitmap,String description,Runnable action){
         ImageButton b=new ImageButton(this);
-        b.setBackgroundColor(Color.rgb(42,42,50)); b.setPadding(dp(1),dp(1),dp(1),dp(1));
+        b.setBackgroundColor(Color.rgb(42,42,50)); b.setPadding(0,0,0,0);
         b.setScaleType(ImageButton.ScaleType.CENTER_INSIDE); b.setImageBitmap(bitmap);
         b.setContentDescription(description); b.setOnClickListener(v->{animateKeyPress(b); action.run();});
         GridLayout.LayoutParams lp=new GridLayout.LayoutParams();
-        lp.width=0; lp.height=dp(36);
+        lp.width=0; lp.height=dp(30);
         lp.columnSpec=GridLayout.spec(GridLayout.UNDEFINED,1f);
         grid.addView(b,lp);
     }
