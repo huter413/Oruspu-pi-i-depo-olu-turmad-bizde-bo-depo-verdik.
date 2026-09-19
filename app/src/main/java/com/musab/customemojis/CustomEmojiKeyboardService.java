@@ -29,6 +29,7 @@ import java.util.Set;
 public class CustomEmojiKeyboardService extends InputMethodService {
     private static final String PREFS="custom_emojis", KEY_URIS="image_uris";
     private boolean emojiMode=false;
+    private boolean numberMode=false;
 
     private static final String[] EMOJIS={
         "😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","🙂","🙃","😉","😌","😍","🥰",
@@ -60,17 +61,46 @@ public class CustomEmojiKeyboardService extends InputMethodService {
         LinearLayout bar=new LinearLayout(this);
         bar.setGravity(Gravity.CENTER_VERTICAL);
         TextView title=new TextView(this);
-        title.setText(emojiMode?"EMOJİLER":"ABC");
+        title.setText(emojiMode?"EMOJİLER":(numberMode?"SAYILAR":"ABC"));
         title.setTextColor(Color.WHITE); title.setTextSize(13);
         bar.addView(title,new LinearLayout.LayoutParams(0,dp(30),1));
 
-        Button toggle=smallButton(emojiMode?"ABC":"😊");
-        toggle.setOnClickListener(v->{emojiMode=!emojiMode; setInputView(buildKeyboard());});
-        bar.addView(toggle,new LinearLayout.LayoutParams(dp(52),dp(30)));
+        Button emojiToggle=smallButton(emojiMode?"ABC":"😊");
+        emojiToggle.setOnClickListener(v->{emojiMode=!emojiMode; numberMode=false; setInputView(buildKeyboard());});
+        bar.addView(emojiToggle,new LinearLayout.LayoutParams(dp(52),dp(30)));
+        Button numbers=smallButton(numberMode?"ABC":"123");
+        numbers.setOnClickListener(v->{numberMode=!numberMode; emojiMode=false; setInputView(buildKeyboard());});
+        bar.addView(numbers,new LinearLayout.LayoutParams(dp(52),dp(30)));
+        Button settings=smallButton("⚙");
+        settings.setOnClickListener(v->{
+            Intent i=new Intent(this,MainActivity.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(i);
+        });
+        bar.addView(settings,new LinearLayout.LayoutParams(dp(42),dp(30)));
         root.addView(bar);
 
-        if(emojiMode) buildEmojiPanel(root); else buildAbcPanel(root);
+        if(emojiMode) buildEmojiPanel(root); else if(numberMode) buildNumberPanel(root); else buildAbcPanel(root);
         return root;
+    }
+
+    private void buildNumberPanel(LinearLayout root){
+        ScrollView scroll=new ScrollView(this);
+        LinearLayout inside=new LinearLayout(this);
+        inside.setOrientation(LinearLayout.VERTICAL);
+        inside.setPadding(dp(2),dp(1),dp(2),dp(2));
+        addTextRow(inside,"1234567890");
+        addTextRow(inside,"-+=*/%()[]");
+        addTextRow(inside,".,!?;:#@");
+        GridLayout bottom=new GridLayout(this);
+        bottom.setColumnCount(4);
+        addKey(bottom,"⌫",this::deleteOne);
+        addKey(bottom,"SPACE",()->commitUnicode(" "));
+        addKey(bottom,"ABC",()->{numberMode=false; setInputView(buildKeyboard());});
+        addKey(bottom,"↵",()->commitUnicode("\n"));
+        inside.addView(bottom,new LinearLayout.LayoutParams(-1,dp(40)));
+        scroll.addView(inside);
+        root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
     }
 
     private void buildAbcPanel(LinearLayout root){
@@ -120,6 +150,7 @@ public class CustomEmojiKeyboardService extends InputMethodService {
 
         GridLayout skinGrid=new GridLayout(this);
         skinGrid.setColumnCount(8);
+        for(String raw:readUris()) addCustomImage(skinGrid,Uri.parse(raw));
         for(int i=0;i<EMOJIS.length;i++){
             final int index=i;
             Bitmap b=loadNamedPng("skin_",index);
@@ -138,7 +169,6 @@ public class CustomEmojiKeyboardService extends InputMethodService {
             Bitmap b=loadNamedPng("special_",index);
             if(b!=null) addBitmapButton(specialGrid,b,SPECIAL_UNICODE[i],()->commitUnicode(SPECIAL_UNICODE[index]));
         }
-        for(String raw:readUris()) addCustomImage(specialGrid,Uri.parse(raw));
         inside.addView(specialGrid,new LinearLayout.LayoutParams(-1,-2));
 
         Button add=smallButton("+ PNG EKLE");
@@ -162,11 +192,20 @@ public class CustomEmojiKeyboardService extends InputMethodService {
     private void addKey(GridLayout grid,String text,Runnable action){
         Button b=smallButton(text);
         b.setTextSize(text.length()>1?10:14);
-        b.setOnClickListener(v->action.run());
+        b.setOnClickListener(v->{animateKeyPress(b); action.run();});
         GridLayout.LayoutParams lp=new GridLayout.LayoutParams();
         lp.width=0; lp.height=dp(36);
         lp.columnSpec=GridLayout.spec(GridLayout.UNDEFINED,1f);
         grid.addView(b,lp);
+    }
+
+    private void animateKeyPress(View v){
+        v.setBackgroundColor(Color.rgb(20,78,145));
+        v.animate().translationY(-dp(8)).alpha(0.88f).setDuration(90).withEndAction(() ->
+            v.animate().translationY(0).alpha(1f).setDuration(140).withEndAction(() ->
+                v.setBackgroundColor(Color.rgb(52,52,62))
+            ).start()
+        ).start();
     }
 
     private Button smallButton(String text){
@@ -181,7 +220,7 @@ public class CustomEmojiKeyboardService extends InputMethodService {
         ImageButton b=new ImageButton(this);
         b.setBackgroundColor(Color.rgb(42,42,50)); b.setPadding(dp(1),dp(1),dp(1),dp(1));
         b.setScaleType(ImageButton.ScaleType.CENTER_INSIDE); b.setImageBitmap(bitmap);
-        b.setContentDescription(description); b.setOnClickListener(v->action.run());
+        b.setContentDescription(description); b.setOnClickListener(v->{animateKeyPress(b); action.run();});
         GridLayout.LayoutParams lp=new GridLayout.LayoutParams();
         lp.width=0; lp.height=dp(36);
         lp.columnSpec=GridLayout.spec(GridLayout.UNDEFINED,1f);
