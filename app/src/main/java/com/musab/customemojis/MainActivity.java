@@ -41,10 +41,17 @@ public class MainActivity extends Activity {
         root.addView(info, new LinearLayout.LayoutParams(-1, -2));
 
         Button change = new Button(this);
-        change.setText("Değiştir");
+        change.setText("Klavyeyi etkinleştir / değiştir");
         change.setOnClickListener(v -> {
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            if (imm != null) imm.showInputMethodPicker();
+            if (imm == null) return;
+            if (isCustomImeEnabled(imm)) {
+                imm.showInputMethodPicker();
+            } else {
+                try {
+                    startActivity(new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS));
+                } catch (Exception ignored) {}
+            }
         });
         root.addView(change, new LinearLayout.LayoutParams(-1, -2));
 
@@ -69,6 +76,16 @@ public class MainActivity extends Activity {
         root.addView(count);
 
         setContentView(root);
+    }
+
+    private boolean isCustomImeEnabled(InputMethodManager imm) {
+        String target = getPackageName() + "/.CustomEmojiKeyboardService";
+        try {
+            for (android.view.inputmethod.InputMethodInfo info : imm.getEnabledInputMethodList()) {
+                if (target.equals(info.getId())) return true;
+            }
+        } catch (Exception ignored) {}
+        return false;
     }
 
     private int getUriCount() {
