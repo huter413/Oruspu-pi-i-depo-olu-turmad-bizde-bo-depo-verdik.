@@ -19,7 +19,7 @@ import android.widget.TextView;
 import android.inputmethodservice.InputMethodService;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -116,9 +116,27 @@ public class CustomEmojiKeyboardService extends InputMethodService {
     }
 
     private Bitmap safeDecode(Uri uri) {
-        try (InputStream in = getContentResolver().openInputStream(uri)) {
-            if (in == null) return null;
-            return BitmapFactory.decodeStream(in);
+        try {
+            if (uri == null) return null;
+            BitmapFactory.Options bounds = new BitmapFactory.Options();
+            bounds.inJustDecodeBounds = true;
+            try (InputStream in = getContentResolver().openInputStream(uri)) {
+                if (in == null) return null;
+                BitmapFactory.decodeStream(in, null, bounds);
+            }
+            if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null;
+
+            int maxSide = Math.max(bounds.outWidth, bounds.outHeight);
+            int sample = 1;
+            while (maxSide / sample > 1024) sample *= 2;
+
+            BitmapFactory.Options opts = new BitmapFactory.Options();
+            opts.inSampleSize = sample;
+            opts.inPreferredConfig = Bitmap.Config.ARGB_8888;
+            try (InputStream in = getContentResolver().openInputStream(uri)) {
+                if (in == null) return null;
+                return BitmapFactory.decodeStream(in, null, opts);
+            }
         } catch (Throwable ignored) {
             return null;
         }
@@ -153,7 +171,9 @@ public class CustomEmojiKeyboardService extends InputMethodService {
     private List<String> readUris() {
         SharedPreferences p = getSharedPreferences(PREFS, MODE_PRIVATE);
         Set<String> set = p.getStringSet(KEY_URIS, new HashSet<>());
-        return new ArrayList<>(set);
+        List<String> result = new ArrayList<>(set);
+        Collections.sort(result);
+        return result;
     }
 
     private int dp(int value) {
