@@ -109,8 +109,9 @@ public class MainActivity extends Activity {
         if (requestCode != PICK_EMOJI || resultCode != RESULT_OK || data == null || data.getData() == null) return;
         Uri uri = data.getData();
         try {
-            final int flags = data.getFlags() & Intent.FLAG_GRANT_READ_URI_PERMISSION;
-            getContentResolver().takePersistableUriPermission(uri, flags);
+            int flags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            if ((flags & Intent.FLAG_GRANT_READ_URI_PERMISSION) == 0) flags |= Intent.FLAG_GRANT_READ_URI_PERMISSION;
+            getContentResolver().takePersistableUriPermission(uri, flags & Intent.FLAG_GRANT_READ_URI_PERMISSION);
         } catch (Exception ignored) {}
 
         Set<String> old = getSharedPreferences(PREFS, MODE_PRIVATE)
@@ -118,7 +119,9 @@ public class MainActivity extends Activity {
         Set<String> copy = new HashSet<>(old);
         copy.add(uri.toString());
         getSharedPreferences(PREFS, MODE_PRIVATE).edit().putStringSet(KEY_URIS, copy).apply();
-        sendBroadcast(new Intent("com.musab.customemojis.EMOJI_CHANGED").setPackage(getPackageName()));
+        Intent changed = new Intent("com.musab.customemojis.EMOJI_CHANGED");
+        changed.setPackage(getPackageName());
+        sendBroadcast(changed);
         recreate();
     }
 }
