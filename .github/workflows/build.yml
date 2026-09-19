@@ -27,8 +27,10 @@ jobs:
       - name: Install emoji renderer
         run: |
           sudo apt-get update
-          sudo apt-get install -y fonts-noto-color-emoji
-          python3 -m pip install --upgrade pillow
+          sudo apt-get install -y fonts-noto-color-emoji fonts-dejavu
+          python3 -m pip install --upgrade pillow fonttools
+      - name: Generate Musab Round TTF font
+        run: python3 tools/build_musab_font.py
       - name: Generate real PNG emoji sheets
         run: python3 tools/generate_emoji_sheets.py
       - name: Set up Gradle 8.9
@@ -45,6 +47,7 @@ jobs:
           test -f app/src/main/java/com/musab/customemojis/MainActivity.java
           test -f app/src/main/java/com/musab/customemojis/CustomEmojiKeyboardService.java
           test -f app/src/main/res/xml/method.xml
+          test -s app/src/main/res/font/musab_round.ttf
           test "$(find app/src/main/res/drawable-nodpi -maxdepth 1 -name 'skin_*.png' | wc -l)" -eq 96
           test "$(find app/src/main/res/drawable-nodpi -maxdepth 1 -name 'special_*.png' | wc -l)" -eq 88
           test -s app/src/main/res/drawable-nodpi/skin_000.png
@@ -60,6 +63,20 @@ jobs:
           test -s "$APK"
           echo "Checking DEX files..."
           unzip -l "$APK" | grep -E '(^|[[:space:]])classes[0-9]*\.dex$'
+          echo "Checking bundled Musab Round font..."
+          unzip -l "$APK" | grep -E 'musab_round\.ttf
+          unzip -l "$APK" | grep -E 'skin_(000|095)\.png$'
+          unzip -l "$APK" | grep -E 'special_(000|087)\.png$'
+          echo "APK verification passed."
+          ls -lh "$APK"
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: custom-emojis-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
+
           echo "Checking bundled emoji PNG resources..."
           unzip -l "$APK" | grep -E 'skin_(000|095)\.png$'
           unzip -l "$APK" | grep -E 'special_(000|087)\.png$'
