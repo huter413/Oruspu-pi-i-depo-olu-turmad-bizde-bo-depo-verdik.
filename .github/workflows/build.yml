@@ -63,7 +63,8 @@ jobs:
         run: |
           test -s app/build/outputs/apk/debug/app-debug.apk
           unzip -l app/build/outputs/apk/debug/app-debug.apk | grep -E 'classes[0-9]*\.dex'
-          unzip -l app/build/outputs/apk/debug/app-debug.apk | grep -E 'res/drawable-nodpi/(emoji_skins|special_emojis)\.png'
+          unzip -l app/build/outputs/apk/debug/app-debug.apk | grep -E 'res/drawable-nodpi/skin_(000|095)\.png'
+          unzip -l app/build/outputs/apk/debug/app-debug.apk | grep -E 'res/drawable-nodpi/special_(000|087)\.png'
           ls -lh app/build/outputs/apk/debug/app-debug.apk
 
       - name: Upload APK
