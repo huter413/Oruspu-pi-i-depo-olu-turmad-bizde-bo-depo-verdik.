@@ -1,3 +1,83 @@
 package com.sikui.emoji;
-import android.inputmethodservice.InputMethodService;import android.view.*;import android.view.inputmethod.InputConnection;import android.graphics.Typeface;import android.graphics.Color;import android.graphics.drawable.GradientDrawable;import android.widget.*;
-public class SikuiInputMethodService extends InputMethodService{Typeface sikui;int[] custom={0xF0000,0xF0001,0xF0002,0xF0003,0xF0004,0xF0005};int[] icons={R.drawable.sikui_emoji_0,R.drawable.sikui_emoji_1,R.drawable.sikui_emoji_2,R.drawable.sikui_emoji_3,R.drawable.sikui_emoji_4,R.drawable.sikui_emoji_5};public View onCreateInputView(){try{sikui=Typeface.createFromAsset(getAssets(),"SIKUI_Emoji.ttf");}catch(Exception ignored){}LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(8,8,8,8);root.setBackgroundColor(Color.rgb(16,19,26));LinearLayout row=new LinearLayout(this);row.setGravity(Gravity.CENTER);for(int i=0;i<6;i++){final int n=i;ImageButton b=new ImageButton(this);b.setImageResource(icons[i]);b.setScaleType(ImageView.ScaleType.CENTER_INSIDE);b.setBackground(keyBg());b.setContentDescription("SIKUI U+F000"+Integer.toHexString(i));b.setOnClickListener(v->sendCustom(custom[n]));row.addView(b,new LinearLayout.LayoutParams(0,82,1));}root.addView(row);String[] vanilla={"😀","😂","😍","😎","😭","😡","👍","❤️","🔥","🎉","✨","💀"};LinearLayout row2=new LinearLayout(this);row2.setGravity(Gravity.CENTER);for(String s:vanilla){TextView b=new TextView(this);b.setText(s);b.setTextSize(30);b.setGravity(Gravity.CENTER);b.setTypeface(sikui);b.setBackground(keyBg());b.setOnClickListener(v->commit(s));row2.addView(b,new LinearLayout.LayoutParams(0,70,1));}root.addView(row2);Button space=new Button(this);space.setText("Boşluk   ⌫   Enter");space.setTypeface(sikui);space.setOnClickListener(v->commit(" "));root.addView(space,new LinearLayout.LayoutParams(-1,64));return root;}GradientDrawable keyBg(){GradientDrawable g=new GradientDrawable();g.setColor(Color.rgb(32,38,51));g.setCornerRadius(18);return g;}void commit(String s){InputConnection c=getCurrentInputConnection();if(c!=null)c.commitText(s,1);}void sendCustom(int cp){InputConnection c=getCurrentInputConnection();if(c!=null)c.commitText(new String(Character.toChars(cp)),1);}}
+
+import android.inputmethodservice.InputMethodService;
+import android.view.Gravity;
+import android.view.View;
+import android.view.inputmethod.InputConnection;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+public class SikuiInputMethodService extends InputMethodService {
+    private static final int[] CUSTOM = {
+        0xF0000, 0xF0001, 0xF0002, 0xF0003, 0xF0004, 0xF0005
+    };
+
+    @Override
+    public View onCreateInputView() {
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(8, 8, 8, 8);
+        root.setBackgroundColor(Color.rgb(16, 19, 26));
+
+        LinearLayout customRow = new LinearLayout(this);
+        customRow.setGravity(Gravity.CENTER);
+
+        for (int i = 0; i < CUSTOM.length; i++) {
+            final int codePoint = CUSTOM[i];
+            TextView key = new TextView(this);
+            key.setText(String.format("F%04X", codePoint & 0xFFFFF));
+            key.setTextSize(16);
+            key.setTextColor(Color.WHITE);
+            key.setGravity(Gravity.CENTER);
+            key.setTypeface(Typeface.DEFAULT_BOLD);
+            key.setBackground(keyBg());
+            key.setContentDescription("SIKUI U+" + Integer.toHexString(codePoint).toUpperCase());
+            key.setOnClickListener(v -> sendCustom(codePoint));
+            customRow.addView(key, new LinearLayout.LayoutParams(0, 82, 1));
+        }
+        root.addView(customRow);
+
+        String[] vanilla = {"😀","😂","😍","😎","😭","😡","👍","❤️","🔥","🎉","✨","💀"};
+        LinearLayout emojiRow = new LinearLayout(this);
+        emojiRow.setGravity(Gravity.CENTER);
+
+        for (String emoji : vanilla) {
+            TextView key = new TextView(this);
+            key.setText(emoji);
+            key.setTextSize(28);
+            key.setGravity(Gravity.CENTER);
+            key.setBackground(keyBg());
+            key.setOnClickListener(v -> commit(emoji));
+            emojiRow.addView(key, new LinearLayout.LayoutParams(0, 70, 1));
+        }
+        root.addView(emojiRow);
+
+        Button space = new Button(this);
+        space.setText("Boşluk");
+        space.setOnClickListener(v -> commit(" "));
+        root.addView(space, new LinearLayout.LayoutParams(-1, 64));
+
+        return root;
+    }
+
+    private GradientDrawable keyBg() {
+        GradientDrawable g = new GradientDrawable();
+        g.setColor(Color.rgb(32, 38, 51));
+        g.setCornerRadius(18);
+        return g;
+    }
+
+    private void commit(String text) {
+        InputConnection c = getCurrentInputConnection();
+        if (c != null) c.commitText(text, 1);
+    }
+
+    private void sendCustom(int codePoint) {
+        InputConnection c = getCurrentInputConnection();
+        if (c != null) c.commitText(new String(Character.toChars(codePoint)), 1);
+    }
+}
