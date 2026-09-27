@@ -1,3 +1,1 @@
-<resources>
-    <color name="transparent">#00000000</color>
-</resources>
+<resources><color name="sikui_bg">#10131A</color><color name="sikui_key">#202633</color><color name="sikui_text">#FFFFFF</color></resources>
