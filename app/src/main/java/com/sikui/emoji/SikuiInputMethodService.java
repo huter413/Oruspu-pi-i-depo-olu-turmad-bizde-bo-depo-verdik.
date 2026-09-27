@@ -37,14 +37,28 @@ public class SikuiInputMethodService extends InputMethodService {
         row.setGravity(Gravity.CENTER);
         for (int i=0;i<CUSTOM.length;i++) {
             final int n=i;
-            ImageView key = new ImageView(this);
-            byte[] bytes = Base64.decode(PNG[i], Base64.DEFAULT);
-            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
-            key.setImageBitmap(bitmap);
-            key.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-            key.setBackground(keyBg());
-            key.setContentDescription("SIKUI U+" + Integer.toHexString(CUSTOM[i]).toUpperCase());
-            key.setOnClickListener(v -> sendCustom(CUSTOM[n]));
+            View key;
+            try {
+                byte[] bytes = Base64.decode(PNG[i], Base64.DEFAULT);
+                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
+                ImageView image = new ImageView(this);
+                if (bitmap != null) {
+                    image.setImageBitmap(bitmap);
+                } else {
+                    image.setContentDescription("SIKUI U+" + Integer.toHexString(CUSTOM[i]).toUpperCase());
+                }
+                image.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                image.setBackground(keyBg());
+                image.setOnClickListener(v -> sendCustom(CUSTOM[n]));
+                key = image;
+            } catch (Throwable ignored) {
+                // Never let one broken asset crash the entire IME.
+                Button fallback = new Button(this);
+                fallback.setText("S" + (i + 1));
+                fallback.setTextSize(18);
+                fallback.setOnClickListener(v -> sendCustom(CUSTOM[n]));
+                key = fallback;
+            }
             row.addView(key,new LinearLayout.LayoutParams(0,82,1));
         }
         root.addView(row);
