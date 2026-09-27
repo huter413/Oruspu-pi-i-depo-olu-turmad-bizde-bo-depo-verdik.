@@ -1,4 +1,1 @@
-<resources>
-    <string name="app_name">Custom Emojis</string>
-    <string name="ime_name">Custom Emojis Klavyesi</string>
-</resources>
+<resources><string name="app_name">SIKUI Emoji Keyboard</string><string name="ime_name">SIKUI Emoji</string></resources>
